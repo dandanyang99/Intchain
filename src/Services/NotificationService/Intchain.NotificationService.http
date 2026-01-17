@@ -1,0 +1,6 @@
+@Intchain.NotificationService_HostAddress = http://localhost:5163
+
+GET {{Intchain.NotificationService_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
