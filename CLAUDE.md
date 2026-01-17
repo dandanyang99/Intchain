@@ -22,57 +22,113 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ### 前端
 - **框架**：uni-app 3.x（基于 Vue.js）
 - **UI组件库**：uView UI 2.x
-- **状态管理**：Vuex 或 Pinia
+- **状态管理**：Pinia（推荐）或 Vuex
+- **HTTP请求**：uni.request 封装
 - **开发工具**：HBuilderX
 
-### 后端
+### API网关
+- **框架**：Ocelot（.NET Core API Gateway）
+- **功能**：路由转发、负载均衡、认证授权、限流熔断
+- **协议**：HTTP/HTTPS、WebSocket
+
+### 后端服务
 - **框架**：ASP.NET Core 8.0
-- **ORM**：Entity Framework Core（Code First）
+- **ORM**：Entity Framework Core 8.0（Code First）
 - **认证授权**：JWT + ASP.NET Core Identity
 - **API文档**：Swagger/OpenAPI
 - **日志**：Serilog
-- **缓存**：Redis
+- **缓存**：Redis 7.x
 
 ### 数据库
 - **主数据库**：MySQL 8.0
-- **缓存**：Redis（库存、会话管理）
+- **缓存**：Redis 7.x（库存、会话管理、分布式锁）
 - **对象存储**：阿里云OSS 或 腾讯云COS
 
 ## 项目架构
 
-### 分层架构（Layered Architecture + DDD）
+### 微服务架构 + API网关
 
 ```
-前端层（uni-app）
-    ├── 销售网点端
-    ├── 彩票中心端
-    ├── 印刷厂端
-    └── 管理员端
-
-API层（ASP.NET Core Web API）
-    ├── Controllers（控制器）
-    ├── Middleware（中间件：认证、异常处理、日志）
-    └── DTOs（数据传输对象）
-
-业务逻辑层（Business Logic Layer）
-    ├── OrderService（订单管理）
-    ├── InventoryService（库存管理）
-    ├── ApprovalService（审批流程）
-    ├── UserService（用户权限）
-    ├── LogisticsService（物流对接）
-    └── NotificationService（消息通知）
-
-数据访问层（Data Access Layer）
-    ├── DbContext（EF Core）
-    ├── Repositories（仓储模式）
-    └── UnitOfWork（工作单元）
-
-基础设施层（Infrastructure）
-    ├── 微信API对接
-    ├── 物流API对接（快递100/快递鸟）
-    ├── Redis缓存服务
-    └── OSS文件存储
+┌─────────────────────────────────────────────────────────────┐
+│                      前端层（uni-app 3.x）                    │
+│  ┌──────────┐  ┌──────────┐  ┌──────────┐  ┌──────────┐   │
+│  │销售网点端│  │彩票中心端│  │ 印刷厂端 │  │ 管理员端 │   │
+│  └──────────┘  └──────────┘  └──────────┘  └──────────┘   │
+└─────────────────────────────────────────────────────────────┘
+                            ↓ HTTPS
+┌─────────────────────────────────────────────────────────────┐
+│                   API网关层（Ocelot Gateway）                 │
+│  ┌────────────────────────────────────────────────────────┐ │
+│  │ • 路由转发  • 负载均衡  • 认证授权  • 限流熔断        │ │
+│  │ • 日志记录  • 请求聚合  • 服务发现  • 缓存策略        │ │
+│  └────────────────────────────────────────────────────────┘ │
+└─────────────────────────────────────────────────────────────┘
+                            ↓
+┌─────────────────────────────────────────────────────────────┐
+│              后端服务层（ASP.NET Core 8.0 微服务）            │
+│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐     │
+│  │  用户服务    │  │  订单服务    │  │  库存服务    │     │
+│  │ UserService  │  │ OrderService │  │InventoryServ │     │
+│  └──────────────┘  └──────────────┘  └──────────────┘     │
+│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐     │
+│  │  审批服务    │  │  物流服务    │  │  通知服务    │     │
+│  │ApprovalServ  │  │LogisticsServ │  │NotificationS │     │
+│  └──────────────┘  └──────────────┘  └──────────────┘     │
+└─────────────────────────────────────────────────────────────┘
+                            ↓
+┌─────────────────────────────────────────────────────────────┐
+│                    数据访问层（EF Core 8.0）                  │
+│  ┌────────────────────────────────────────────────────────┐ │
+│  │ • DbContext  • Repository模式  • UnitOfWork           │ │
+│  └────────────────────────────────────────────────────────┘ │
+└─────────────────────────────────────────────────────────────┘
+                            ↓
+┌─────────────────────────────────────────────────────────────┐
+│                        数据存储层                             │
+│  ┌──────────┐  ┌──────────┐  ┌──────────┐                 │
+│  │ MySQL 8.0│  │ Redis 7.x│  │ 阿里云OSS│                 │
+│  └──────────┘  └──────────┘  └──────────┘                 │
+└─────────────────────────────────────────────────────────────┘
+                            ↓
+┌─────────────────────────────────────────────────────────────┐
+│                      基础设施层                               │
+│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐     │
+│  │  微信API     │  │  物流API     │  │  短信服务    │     │
+│  └──────────────┘  └──────────────┘  └──────────────┘     │
+└─────────────────────────────────────────────────────────────┘
 ```
+
+### 服务划分说明
+
+**用户服务（UserService）**：
+- 用户认证和授权
+- 角色权限管理
+- 用户信息管理
+
+**订单服务（OrderService）**：
+- 申请订单管理
+- 印刷订单管理
+- 订单状态流转
+
+**库存服务（InventoryService）**：
+- 彩票产品管理
+- 库存扣减和释放
+- 库存查询和统计
+
+**审批服务（ApprovalService）**：
+- 审批流程管理
+- 审批记录查询
+- 审批通知
+
+**物流服务（LogisticsService）**：
+- 物流信息管理
+- 第三方物流对接
+- 物流状态更新
+
+**通知服务（NotificationService）**：
+- 微信模板消息推送
+- 短信通知
+- 站内消息
 
 ## 核心领域概念
 
@@ -90,7 +146,7 @@ API层（ASP.NET Core Web API）
 
 ### 订单状态机
 
-**申请订单状态**：
+**申请订单状态流转**：
 ```
 待审批(Pending) → 审批通过(Approved) → 待发货(WaitingShipment)
                                     → 已发货(Shipped) → 待收货(InTransit)
@@ -99,7 +155,7 @@ API层（ASP.NET Core Web API）
     审批拒绝(Rejected)
 ```
 
-**印刷订单状态**：
+**印刷订单状态流转**：
 ```
 待接单(Pending) → 生产中(InProduction) → 待发货(WaitingShipment)
               → 已发货(Shipped) → 已完成(Completed)
@@ -107,7 +163,40 @@ API层（ASP.NET Core Web API）
 
 ## 关键技术实现
 
-### 1. 库存管理（防止超卖）
+### 1. API网关（Ocelot）
+
+**配置示例**：
+```json
+{
+  "Routes": [
+    {
+      "DownstreamPathTemplate": "/api/users/{everything}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        { "Host": "localhost", "Port": 5001 }
+      ],
+      "UpstreamPathTemplate": "/api/users/{everything}",
+      "UpstreamHttpMethod": [ "Get", "Post", "Put", "Delete" ],
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Bearer"
+      },
+      "RateLimitOptions": {
+        "EnableRateLimiting": true,
+        "Period": "1s",
+        "Limit": 100
+      }
+    }
+  ]
+}
+```
+
+**网关功能**：
+- 统一入口：所有前端请求通过网关转发
+- JWT验证：在网关层统一验证token
+- 限流熔断：防止服务过载
+- 负载均衡：多实例服务自动负载均衡
+
+### 2. 库存管理（防止超卖）
 
 使用 Redis 分布式锁实现库存扣减：
 
@@ -132,58 +221,88 @@ using (var redisLock = await _redisLockFactory.CreateLockAsync($"inventory:{prod
 - 审批通过：确认扣减
 - 审批拒绝：释放库存
 
-### 2. 认证授权
+### 3. 认证授权
 
 **微信小程序登录流程**：
 1. 小程序调用 `wx.login()` 获取 code
-2. 后端使用 code 换取 openid 和 session_key
-3. 后端生成 JWT token 返回给小程序
-4. 小程序后续请求携带 token
+2. 小程序将 code 发送到网关
+3. 网关转发到用户服务
+4. 用户服务使用 code 换取 openid 和 session_key
+5. 用户服务生成 JWT token 返回
+6. 小程序后续请求携带 token，网关验证
 
 **权限控制**：
-- 使用 ASP.NET Core Policy-based Authorization
-- JWT token 中包含用户角色信息
-- API 接口使用 `[Authorize(Policy = "RoleName")]` 进行权限控制
+- 网关层：验证 JWT token 有效性
+- 服务层：使用 `[Authorize(Policy = "RoleName")]` 进行细粒度权限控制
 
-### 3. 物流对接
+## 代码审核流程
 
-**第三方物流API**：
-- 快递100（https://www.kuaidi100.com/）
-- 快递鸟（https://www.kdniao.com/）
+### Git分支策略
 
-**实现方式**：
-- 印刷厂发货时填写物流公司和运单号
-- 后端异步查询物流信息
-- 定时任务更新物流状态
-- 物流状态变更时推送消息通知
+采用 Git Flow 分支模型：
+
+```
+main（主分支）
+  ├── develop（开发分支）
+  │     ├── feature/user-login（功能分支）
+  │     ├── feature/order-management（功能分支）
+  │     └── feature/inventory-system（功能分支）
+  ├── release/v1.0.0（发布分支）
+  └── hotfix/fix-login-bug（热修复分支）
+```
+
+### 代码审核规范
+
+**提交前检查**：
+1. 代码编译通过，无编译错误
+2. 单元测试全部通过
+3. 代码符合编码规范（使用 EditorConfig 和 StyleCop）
+4. 无明显的代码异味（重复代码、过长方法等）
+
+**Pull Request 流程**：
+1. 开发者在 feature 分支完成功能开发
+2. 提交 PR 到 develop 分支
+3. 至少需要 1 名团队成员审核通过
+4. CI/CD 自动化测试通过
+5. 合并到 develop 分支
+
+**代码审核要点**：
+- **功能正确性**：代码是否实现了需求
+- **代码质量**：是否遵循 SOLID 原则和设计模式
+- **安全性**：是否存在安全漏洞（SQL注入、XSS等）
+- **性能**：是否存在性能问题（N+1查询、内存泄漏等）
+- **可维护性**：代码是否易于理解和维护
+- **测试覆盖率**：关键业务逻辑是否有单元测试
 
 ## 开发工作流程
 
 ### 开发阶段优先级
 
-**第一阶段：基础功能**
-- 用户登录认证（微信授权 + JWT）
-- 用户角色管理
-- 彩票中心、销售网点、印刷厂基础数据管理
-- 权限控制实现
+**第一阶段：基础设施搭建**
+- 搭建 API 网关（Ocelot）
+- 创建各个微服务项目骨架
+- 配置数据库连接和 EF Core
+- 实现用户认证和授权
+- 配置 Redis 缓存
 
-**第二阶段：核心业务**
-- 彩票产品发布和管理
-- 销售网点申请彩票
+**第二阶段：核心业务开发**
+- 彩票产品管理功能
+- 销售网点申请功能
 - 彩票中心审批流程
 - 库存管理（Redis分布式锁）
+- 订单状态流转
 
 **第三阶段：物流管理**
 - 印刷订单生成和管理
-- 发货管理
-- 物流信息对接
+- 发货管理功能
+- 第三方物流API对接
 - 物流跟踪和收货确认
 
 **第四阶段：优化完善**
-- 消息通知（模板消息）
+- 微信模板消息推送
 - 数据统计和报表
-- 性能优化
-- 缓存优化
+- 性能优化和缓存优化
+- 安全加固和压力测试
 
 ## API规范
 
@@ -205,6 +324,7 @@ using (var redisLock = await _redisLockFactory.CreateLockAsync($"inventory:{prod
 - 使用标准HTTP方法：GET（查询）、POST（创建）、PUT（更新）、DELETE（删除）
 - URL版本控制：`/api/v1/`
 - 资源命名使用复数形式：`/api/v1/products`、`/api/v1/orders`
+- 网关统一前缀：所有请求通过网关 `https://gateway.example.com/api/v1/`
 
 ## 重要注意事项
 
@@ -218,9 +338,10 @@ using (var redisLock = await _redisLockFactory.CreateLockAsync($"inventory:{prod
 ### 安全性
 
 - **输入验证**：验证所有用户输入，防止SQL注入、XSS攻击
-- **权限验证**：每个API接口都需要验证用户角色权限
-- **敏感信息**：不要在代码中硬编码API密钥、数据库密码等敏感信息
+- **权限验证**：网关层和服务层双重权限验证
+- **敏感信息**：使用配置中心管理敏感信息，不要硬编码
 - **日志记录**：记录关键操作日志，但不要记录敏感信息（密码、token等）
+- **HTTPS**：生产环境必须使用HTTPS
 
 ### 性能优化
 
@@ -228,21 +349,33 @@ using (var redisLock = await _redisLockFactory.CreateLockAsync($"inventory:{prod
 - **数据库优化**：为常用查询字段添加索引
 - **异步处理**：物流查询、消息推送等耗时操作使用异步处理
 - **分页查询**：列表查询必须实现分页，避免一次性加载大量数据
+- **网关缓存**：在网关层缓存不常变化的数据
 
 ## 参考文档
 
 - **需求文档**：[doc/需求文档.md](doc/需求文档.md)
 - **技术路线文档**：[doc/技术路线文档.md](doc/技术路线文档.md)
+- **开发方案文档**：[doc/开发方案.md](doc/开发方案.md)
+- **开发计划文档**：[doc/开发计划.md](doc/开发计划.md)
+- **部署方案文档**：[doc/部署方案.md](doc/部署方案.md)
 - **微信小程序开发文档**：https://developers.weixin.qq.com/miniprogram/dev/framework/
 - **uni-app官方文档**：https://uniapp.dcloud.net.cn/
 - **ASP.NET Core文档**：https://learn.microsoft.com/zh-cn/aspnet/core/
+- **Ocelot文档**：https://ocelot.readthedocs.io/
 - **Entity Framework Core文档**：https://learn.microsoft.com/zh-cn/ef/core/
 
 ## 项目状态
 
-当前项目处于规划阶段，尚未开始实际开发。在开始编码前，建议：
-1. 确认技术栈选型
-2. 搭建开发环境
-3. 创建项目骨架
-4. 设计数据库表结构
-5. 定义API接口规范
+当前项目处于规划阶段，技术栈已确定：
+- 前端：uni-app 3.x
+- 网关：Ocelot
+- 后端：ASP.NET Core 8.0
+- 数据库：MySQL 8.0
+- 缓存：Redis 7.x
+
+开发前准备工作：
+1. 搭建开发环境
+2. 创建项目骨架（网关 + 微服务）
+3. 设计数据库表结构
+4. 定义API接口规范
+5. 配置CI/CD流程
