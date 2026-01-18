@@ -12,6 +12,11 @@ builder.Services.AddMySqlDatabase<InventoryDbContext>(builder.Configuration);
 // Add Redis Cache
 builder.Services.AddRedisCache(builder.Configuration);
 
+// Register custom services
+builder.Services.AddScoped<Intchain.InventoryService.Services.Redis.IRedisLockService, Intchain.InventoryService.Services.Redis.RedisLockService>();
+builder.Services.AddScoped<Intchain.InventoryService.Services.IProductService, Intchain.InventoryService.Services.ProductService>();
+builder.Services.AddScoped<Intchain.InventoryService.Services.IInventoryService, Intchain.InventoryService.Services.InventoryService>();
+
 // Add Swagger/OpenAPI support
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>
