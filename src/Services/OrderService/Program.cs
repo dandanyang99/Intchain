@@ -15,6 +15,7 @@ builder.Services.AddRedisCache(builder.Configuration);
 // Register custom services
 builder.Services.AddScoped<Intchain.OrderService.Services.IApplicationOrderService, Intchain.OrderService.Services.ApplicationOrderService>();
 builder.Services.AddScoped<Intchain.OrderService.Services.IPrintingOrderService, Intchain.OrderService.Services.PrintingOrderService>();
+builder.Services.AddScoped<Intchain.OrderService.Services.IOrderStatusHistoryService, Intchain.OrderService.Services.OrderStatusHistoryService>();
 
 // Add HTTP client for InventoryService
 builder.Services.AddHttpClient("InventoryService", client =>

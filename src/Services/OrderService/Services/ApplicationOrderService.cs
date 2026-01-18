@@ -16,11 +16,16 @@ public class ApplicationOrderService : IApplicationOrderService
 {
     private readonly OrderDbContext _context;
     private readonly IHttpClientFactory _httpClientFactory;
+    private readonly IOrderStatusHistoryService _historyService;
 
-    public ApplicationOrderService(OrderDbContext context, IHttpClientFactory httpClientFactory)
+    public ApplicationOrderService(
+        OrderDbContext context,
+        IHttpClientFactory httpClientFactory,
+        IOrderStatusHistoryService historyService)
     {
         _context = context;
         _httpClientFactory = httpClientFactory;
+        _historyService = historyService;
     }
 
     public async Task<ApplicationOrderResponse?> CreateApplicationOrderAsync(CreateApplicationOrderRequest request)
@@ -217,12 +222,24 @@ public class ApplicationOrderService : IApplicationOrderService
         // };
         // await _printingOrderService.CreatePrintingOrderAsync(printingOrderRequest);
 
+        // 保存原始状态用于历史记录
+        var oldStatus = order.Status;
+
         order.Status = OrderStatus.ApplicationApproved;
         order.Quantity = request.ApprovedQuantity;
         order.Remarks = request.ApprovalRemarks ?? order.Remarks;
         order.UpdatedAt = DateTime.UtcNow;
 
         await _context.SaveChangesAsync();
+
+        // 记录状态转换历史
+        await _historyService.RecordStatusTransitionAsync(
+            "Application",
+            order.Id,
+            oldStatus,
+            order.Status,
+            reason: request.ApprovalRemarks
+        );
 
         return new OrderOperationResponse
         {
@@ -283,11 +300,23 @@ public class ApplicationOrderService : IApplicationOrderService
             };
         }
 
+        // 保存原始状态用于历史记录
+        var oldStatus = order.Status;
+
         order.Status = OrderStatus.ApplicationRejected;
         order.Remarks = request.RejectionReason ?? order.Remarks;
         order.UpdatedAt = DateTime.UtcNow;
 
         await _context.SaveChangesAsync();
+
+        // 记录状态转换历史
+        await _historyService.RecordStatusTransitionAsync(
+            "Application",
+            order.Id,
+            oldStatus,
+            order.Status,
+            reason: request.RejectionReason
+        );
 
         return new OrderOperationResponse
         {
@@ -344,10 +373,21 @@ public class ApplicationOrderService : IApplicationOrderService
             };
         }
 
+        // 保存原始状态用于历史记录
+        var oldStatus = order.Status;
+
         order.Status = newStatus;
         order.UpdatedAt = DateTime.UtcNow;
 
         await _context.SaveChangesAsync();
+
+        // 记录状态转换历史
+        await _historyService.RecordStatusTransitionAsync(
+            "Application",
+            order.Id,
+            oldStatus,
+            order.Status
+        );
 
         return new OrderOperationResponse
         {

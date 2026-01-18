@@ -11,6 +11,7 @@ public class OrderDbContext : DbContext
 
     public DbSet<ApplicationOrder> ApplicationOrders { get; set; }
     public DbSet<PrintingOrder> PrintingOrders { get; set; }
+    public DbSet<OrderStatusHistory> OrderStatusHistories { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -27,5 +28,12 @@ public class OrderDbContext : DbContext
 
         modelBuilder.Entity<PrintingOrder>()
             .HasIndex(p => p.ApplicationOrderId);
+
+        // 配置OrderStatusHistory索引
+        modelBuilder.Entity<OrderStatusHistory>()
+            .HasIndex(h => new { h.OrderType, h.OrderId });
+
+        modelBuilder.Entity<OrderStatusHistory>()
+            .HasIndex(h => h.CreatedAt);
     }
 }

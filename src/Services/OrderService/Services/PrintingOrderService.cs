@@ -14,11 +14,16 @@ public class PrintingOrderService : IPrintingOrderService
 {
     private readonly OrderDbContext _context;
     private readonly IHttpClientFactory _httpClientFactory;
+    private readonly IOrderStatusHistoryService _historyService;
 
-    public PrintingOrderService(OrderDbContext context, IHttpClientFactory httpClientFactory)
+    public PrintingOrderService(
+        OrderDbContext context,
+        IHttpClientFactory httpClientFactory,
+        IOrderStatusHistoryService historyService)
     {
         _context = context;
         _httpClientFactory = httpClientFactory;
+        _historyService = historyService;
     }
 
     public async Task<PrintingOrderResponse?> CreatePrintingOrderAsync(CreatePrintingOrderRequest request)
@@ -167,10 +172,21 @@ public class PrintingOrderService : IPrintingOrderService
             };
         }
 
+        // 保存原始状态用于历史记录
+        var oldStatus = order.Status;
+
         order.Status = newStatus;
         order.UpdatedAt = DateTime.UtcNow;
 
         await _context.SaveChangesAsync();
+
+        // 记录状态转换历史
+        await _historyService.RecordStatusTransitionAsync(
+            "Printing",
+            order.Id,
+            oldStatus,
+            order.Status
+        );
 
         return new OrderOperationResponse
         {
