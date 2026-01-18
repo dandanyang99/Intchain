@@ -1,7 +1,16 @@
+using Intchain.Shared.Extensions;
+using Intchain.OrderService.Data;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container
 builder.Services.AddControllers();
+
+// Add MySQL Database
+builder.Services.AddMySqlDatabase<OrderDbContext>(builder.Configuration);
+
+// Add Redis Cache
+builder.Services.AddRedisCache(builder.Configuration);
 
 // Add Swagger/OpenAPI support
 builder.Services.AddEndpointsApiExplorer();
