@@ -67,6 +67,42 @@
 			"style": {
 				"navigationBarTitleText": "订单审批"
 			}
+		},
+		{
+			"path": "pages/order/PrintingOrderList",
+			"style": {
+				"navigationBarTitleText": "印刷订单列表"
+			}
+		},
+		{
+			"path": "pages/outlet/OutletManagement",
+			"style": {
+				"navigationBarTitleText": "销售网点管理"
+			}
+		},
+		{
+			"path": "pages/user/UserManagement",
+			"style": {
+				"navigationBarTitleText": "用户管理"
+			}
+		},
+		{
+			"path": "pages/inventory/InventoryManagement",
+			"style": {
+				"navigationBarTitleText": "库存管理"
+			}
+		},
+		{
+			"path": "pages/lottery/LotteryCenterManagement",
+			"style": {
+				"navigationBarTitleText": "彩票中心管理"
+			}
+		},
+		{
+			"path": "pages/admin/MiniProgramManagement",
+			"style": {
+				"navigationBarTitleText": "小程序管理"
+			}
 		}
 	],
 	"globalStyle": {

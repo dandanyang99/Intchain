@@ -2,7 +2,7 @@
  * 用户相关 API
  */
 
-import { get, post, put } from '@/utils/request.js'
+import { get, post, put, del } from '@/utils/request.js'
 
 /**
  * 用户注册
@@ -58,4 +58,39 @@ export const updateUserInfo = (data) => {
  */
 export const getUserList = (params) => {
   return get('/api/users/list', params)
+}
+
+/**
+ * 获取用户详情
+ */
+export const getUserDetail = (id) => {
+  return get(`/api/users/${id}`)
+}
+
+/**
+ * 创建用户
+ */
+export const createUser = (data) => {
+  return post('/api/users', data)
+}
+
+/**
+ * 更新用户
+ */
+export const updateUser = (id, data) => {
+  return put(`/api/users/${id}`, data)
+}
+
+/**
+ * 删除用户
+ */
+export const deleteUser = (id) => {
+  return del(`/api/users/${id}`)
+}
+
+/**
+ * 重置密码
+ */
+export const resetPassword = (id, data) => {
+  return post(`/api/users/${id}/reset-password`, data)
 }
