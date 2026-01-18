@@ -211,4 +211,37 @@ public class InventoryService : IInventoryService
             SoldStock = soldStock
         };
     }
+
+    public async Task<InventoryOperationResponse> UpdateProductStockAfterPrintingAsync(int productId)
+    {
+        var lockKey = $"inventory:lock:{productId}";
+
+        return await _redisLockService.ExecuteWithLockAsync(lockKey, async () =>
+        {
+            var product = await _context.LotteryProducts.FindAsync(productId);
+
+            if (product == null)
+            {
+                return new InventoryOperationResponse
+                {
+                    Success = false,
+                    Message = "产品不存在"
+                };
+            }
+
+            // 将可用库存更新为预计总库存
+            product.AvailableStock = product.TotalStock;
+            product.UpdatedAt = DateTime.UtcNow;
+
+            await _context.SaveChangesAsync();
+
+            return new InventoryOperationResponse
+            {
+                Success = true,
+                Message = "印刷完成，库存已更新",
+                CurrentAvailableStock = product.AvailableStock,
+                CurrentReservedStock = product.ReservedStock
+            };
+        }, TimeSpan.FromSeconds(5));
+    }
 }

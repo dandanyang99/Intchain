@@ -12,6 +12,16 @@ builder.Services.AddMySqlDatabase<ApprovalDbContext>(builder.Configuration);
 // Add Redis Cache
 builder.Services.AddRedisCache(builder.Configuration);
 
+// Register custom services
+builder.Services.AddScoped<Intchain.ApprovalService.Services.IApprovalService, Intchain.ApprovalService.Services.ApprovalService>();
+
+// Add HTTP client for OrderService (future integration)
+builder.Services.AddHttpClient("OrderService", client =>
+{
+    client.BaseAddress = new Uri("http://localhost:5003");
+    client.Timeout = TimeSpan.FromSeconds(30);
+});
+
 // Add Swagger/OpenAPI support
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>

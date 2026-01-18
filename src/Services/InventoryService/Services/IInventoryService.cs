@@ -36,4 +36,9 @@ public interface IInventoryService
     /// 获取库存统计
     /// </summary>
     Task<InventoryStatsResponse> GetInventoryStatsAsync(int productId);
+
+    /// <summary>
+    /// 印刷完成后更新产品库存
+    /// </summary>
+    Task<InventoryOperationResponse> UpdateProductStockAfterPrintingAsync(int productId);
 }

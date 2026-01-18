@@ -2,6 +2,8 @@ using Intchain.InventoryService.Data;
 using Intchain.InventoryService.DTOs;
 using Intchain.InventoryService.Models;
 using Microsoft.EntityFrameworkCore;
+using System.Text;
+using System.Text.Json;
 
 namespace Intchain.InventoryService.Services;
 
@@ -11,10 +13,12 @@ namespace Intchain.InventoryService.Services;
 public class ProductService : IProductService
 {
     private readonly InventoryDbContext _context;
+    private readonly IHttpClientFactory _httpClientFactory;
 
-    public ProductService(InventoryDbContext context)
+    public ProductService(InventoryDbContext context, IHttpClientFactory httpClientFactory)
     {
         _context = context;
+        _httpClientFactory = httpClientFactory;
     }
 
     public async Task<ProductResponse?> CreateProductAsync(CreateProductRequest request)
@@ -24,7 +28,7 @@ public class ProductService : IProductService
             Name = request.Name,
             UnitPrice = request.UnitPrice,
             TotalStock = request.TotalStock,
-            AvailableStock = request.TotalStock,
+            AvailableStock = 0, // 初始库存为0，印刷完成后才更新为实际库存
             ReservedStock = 0,
             LotteryCenterId = request.LotteryCenterId,
             CreatedAt = DateTime.UtcNow,
@@ -34,7 +38,38 @@ public class ProductService : IProductService
         _context.LotteryProducts.Add(product);
         await _context.SaveChangesAsync();
 
+        // 发布产品的同时，创建印刷订单发给印刷厂
+        try
+        {
+            await CreatePrintingOrderAsync(product.Id, request.PrintingFactoryId, request.TotalStock);
+        }
+        catch (Exception ex)
+        {
+            // 记录错误但不影响产品创建
+            Console.WriteLine($"创建印刷订单失败: {ex.Message}");
+        }
+
         return MapToResponse(product);
+    }
+
+    private async Task CreatePrintingOrderAsync(int productId, int printingFactoryId, int quantity)
+    {
+        var httpClient = _httpClientFactory.CreateClient("OrderService");
+
+        var printingOrderRequest = new
+        {
+            ApplicationOrderId = (int?)null,
+            PrintingFactoryId = printingFactoryId,
+            ProductId = productId,
+            Quantity = quantity,
+            Remarks = "Product publication printing order"
+        };
+
+        var jsonContent = JsonSerializer.Serialize(printingOrderRequest);
+        var content = new StringContent(jsonContent, Encoding.UTF8, "application/json");
+
+        var response = await httpClient.PostAsync("/api/printingorders", content);
+        response.EnsureSuccessStatusCode();
     }
 
     public async Task<ProductResponse?> UpdateProductAsync(int id, UpdateProductRequest request)

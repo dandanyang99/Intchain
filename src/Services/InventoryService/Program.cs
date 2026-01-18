@@ -17,6 +17,13 @@ builder.Services.AddScoped<Intchain.InventoryService.Services.Redis.IRedisLockSe
 builder.Services.AddScoped<Intchain.InventoryService.Services.IProductService, Intchain.InventoryService.Services.ProductService>();
 builder.Services.AddScoped<Intchain.InventoryService.Services.IInventoryService, Intchain.InventoryService.Services.InventoryService>();
 
+// Add HTTP client for OrderService (to create printing orders when publishing products)
+builder.Services.AddHttpClient("OrderService", client =>
+{
+    client.BaseAddress = new Uri("http://localhost:5003");
+    client.Timeout = TimeSpan.FromSeconds(30);
+});
+
 // Add Swagger/OpenAPI support
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>

@@ -25,6 +25,7 @@ builder.Services.AddCors(options =>
 builder.Services.AddScoped<IPasswordHasher, PasswordHasher>();
 builder.Services.AddScoped<IJwtTokenService, JwtTokenService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<ISalesOutletService, SalesOutletService>();
 
 // Register WeChat service
 builder.Services.AddHttpClient<IWeChatService, WeChatService>();

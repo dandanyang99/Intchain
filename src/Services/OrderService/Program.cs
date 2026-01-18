@@ -12,6 +12,17 @@ builder.Services.AddMySqlDatabase<OrderDbContext>(builder.Configuration);
 // Add Redis Cache
 builder.Services.AddRedisCache(builder.Configuration);
 
+// Register custom services
+builder.Services.AddScoped<Intchain.OrderService.Services.IApplicationOrderService, Intchain.OrderService.Services.ApplicationOrderService>();
+builder.Services.AddScoped<Intchain.OrderService.Services.IPrintingOrderService, Intchain.OrderService.Services.PrintingOrderService>();
+
+// Add HTTP client for InventoryService
+builder.Services.AddHttpClient("InventoryService", client =>
+{
+    client.BaseAddress = new Uri("http://localhost:5276");
+    client.Timeout = TimeSpan.FromSeconds(30);
+});
+
 // Add Swagger/OpenAPI support
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>

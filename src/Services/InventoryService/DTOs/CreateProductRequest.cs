@@ -33,4 +33,11 @@ public class CreateProductRequest
     /// </summary>
     [Required(ErrorMessage = "彩票中心ID不能为空")]
     public int LotteryCenterId { get; set; }
+
+    /// <summary>
+    /// 印刷厂ID（发布产品时需要指定印刷厂）
+    /// </summary>
+    [Required(ErrorMessage = "印刷厂ID不能为空")]
+    [Range(1, int.MaxValue, ErrorMessage = "印刷厂ID必须大于0")]
+    public int PrintingFactoryId { get; set; }
 }

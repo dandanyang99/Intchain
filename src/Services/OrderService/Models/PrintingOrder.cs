@@ -25,11 +25,10 @@ public class PrintingOrder
     public string OrderNumber { get; set; } = string.Empty;
 
     /// <summary>
-    /// 关联的申请订单ID
+    /// 关联的申请订单ID（可选，发布产品时创建的印刷订单可能没有关联申请订单）
     /// </summary>
-    [Required]
     [Column("application_order_id")]
-    public int ApplicationOrderId { get; set; }
+    public int? ApplicationOrderId { get; set; }
 
     /// <summary>
     /// 印刷厂ID

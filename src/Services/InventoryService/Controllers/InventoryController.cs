@@ -130,4 +130,27 @@ public class InventoryController : ControllerBase
             return NotFound(new { message = ex.Message });
         }
     }
+
+    /// <summary>
+    /// 印刷完成后更新产品库存
+    /// </summary>
+    [HttpPost("update-after-printing/{productId}")]
+    public async Task<IActionResult> UpdateProductStockAfterPrinting(int productId)
+    {
+        try
+        {
+            var result = await _inventoryService.UpdateProductStockAfterPrintingAsync(productId);
+
+            if (!result.Success)
+            {
+                return BadRequest(result);
+            }
+
+            return Ok(result);
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
+    }
 }
