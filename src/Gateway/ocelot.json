@@ -10,7 +10,17 @@
         }
       ],
       "UpstreamPathTemplate": "/api/users/{everything}",
-      "UpstreamHttpMethod": [ "Get", "Post", "Put", "Delete" ]
+      "UpstreamHttpMethod": [ "Get", "Post", "Put", "Delete" ],
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Bearer"
+      },
+      "RateLimitOptions": {
+        "ClientWhitelist": [],
+        "EnableRateLimiting": true,
+        "Period": "1s",
+        "PeriodTimespan": 1,
+        "Limit": 100
+      }
     },
     {
       "DownstreamPathTemplate": "/api/{everything}",
@@ -22,7 +32,17 @@
         }
       ],
       "UpstreamPathTemplate": "/api/orders/{everything}",
-      "UpstreamHttpMethod": [ "Get", "Post", "Put", "Delete" ]
+      "UpstreamHttpMethod": [ "Get", "Post", "Put", "Delete" ],
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Bearer"
+      },
+      "RateLimitOptions": {
+        "ClientWhitelist": [],
+        "EnableRateLimiting": true,
+        "Period": "1s",
+        "PeriodTimespan": 1,
+        "Limit": 100
+      }
     },
     {
       "DownstreamPathTemplate": "/api/{everything}",
@@ -34,7 +54,17 @@
         }
       ],
       "UpstreamPathTemplate": "/api/products/{everything}",
-      "UpstreamHttpMethod": [ "Get", "Post", "Put", "Delete" ]
+      "UpstreamHttpMethod": [ "Get", "Post", "Put", "Delete" ],
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Bearer"
+      },
+      "RateLimitOptions": {
+        "ClientWhitelist": [],
+        "EnableRateLimiting": true,
+        "Period": "1s",
+        "PeriodTimespan": 1,
+        "Limit": 100
+      }
     },
     {
       "DownstreamPathTemplate": "/api/{everything}",
@@ -46,7 +76,17 @@
         }
       ],
       "UpstreamPathTemplate": "/api/approvals/{everything}",
-      "UpstreamHttpMethod": [ "Get", "Post", "Put", "Delete" ]
+      "UpstreamHttpMethod": [ "Get", "Post", "Put", "Delete" ],
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Bearer"
+      },
+      "RateLimitOptions": {
+        "ClientWhitelist": [],
+        "EnableRateLimiting": true,
+        "Period": "1s",
+        "PeriodTimespan": 1,
+        "Limit": 100
+      }
     },
     {
       "DownstreamPathTemplate": "/api/{everything}",
@@ -58,7 +98,17 @@
         }
       ],
       "UpstreamPathTemplate": "/api/logistics/{everything}",
-      "UpstreamHttpMethod": [ "Get", "Post", "Put", "Delete" ]
+      "UpstreamHttpMethod": [ "Get", "Post", "Put", "Delete" ],
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Bearer"
+      },
+      "RateLimitOptions": {
+        "ClientWhitelist": [],
+        "EnableRateLimiting": true,
+        "Period": "1s",
+        "PeriodTimespan": 1,
+        "Limit": 100
+      }
     },
     {
       "DownstreamPathTemplate": "/api/{everything}",
@@ -70,10 +120,25 @@
         }
       ],
       "UpstreamPathTemplate": "/api/notifications/{everything}",
-      "UpstreamHttpMethod": [ "Get", "Post", "Put", "Delete" ]
+      "UpstreamHttpMethod": [ "Get", "Post", "Put", "Delete" ],
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "Bearer"
+      },
+      "RateLimitOptions": {
+        "ClientWhitelist": [],
+        "EnableRateLimiting": true,
+        "Period": "1s",
+        "PeriodTimespan": 1,
+        "Limit": 100
+      }
     }
   ],
   "GlobalConfiguration": {
-    "BaseUrl": "http://localhost:5000"
+    "BaseUrl": "http://localhost:5000",
+    "RateLimitOptions": {
+      "DisableRateLimitHeaders": false,
+      "QuotaExceededMessage": "Rate limit exceeded. Please try again later.",
+      "HttpStatusCode": 429
+    }
   }
 }
