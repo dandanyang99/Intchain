@@ -6,7 +6,7 @@
 // 开发环境配置
 const devConfig = {
   // API 网关地址
-  baseURL: 'http://localhost:5000',
+  baseURL: 'http://localhost:5199',
   // 请求超时时间（毫秒）
   timeout: 30000,
   // 是否显示请求日志

@@ -4,15 +4,39 @@
  */
 
 import apiConfig from '@/config/api.config.js'
-import { getToken, removeToken } from './auth.js'
+import { getToken, removeToken, isTokenValid, clearAuth } from './auth.js'
 
 /**
  * 请求拦截器
  */
 const requestInterceptor = (config) => {
-  // 添加 token
+  // 检查是否是认证接口（register/login），这些接口不需要 token
+  const isAuthEndpoint = config.url.includes('/api/auth/')
+
+  // 获取 token
   const token = getToken()
-  if (token) {
+
+  // 如果不是认证接口且有 token，则验证 token
+  if (!isAuthEndpoint && token) {
+    // 验证 token 是否有效
+    if (!isTokenValid(token)) {
+      // token 无效或已过期，清除认证信息
+      clearAuth()
+      uni.showToast({
+        title: '登录已过期，请重新登录',
+        icon: 'none'
+      })
+      // 跳转到登录页
+      setTimeout(() => {
+        uni.reLaunch({
+          url: '/pages/login/login'
+        })
+      }, 1500)
+      // 返回 null 表示请求被拦截
+      return null
+    }
+
+    // token 有效，添加到请求头
     config.header = config.header || {}
     config.header['Authorization'] = `Bearer ${token}`
   }
@@ -92,6 +116,14 @@ const request = (options) => {
 
   // 请求拦截
   const interceptedConfig = requestInterceptor(config)
+
+  // 如果拦截器返回 null，说明请求被拦截（如 token 无效）
+  if (!interceptedConfig) {
+    return Promise.reject({
+      code: 401,
+      message: '认证失败，请重新登录'
+    })
+  }
 
   // 发起请求
   return new Promise((resolve, reject) => {

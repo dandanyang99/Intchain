@@ -5,6 +5,20 @@
 import { get, post, put } from '@/utils/request.js'
 
 /**
+ * 用户注册
+ */
+export const register = (data) => {
+  return post('/api/auth/register', data)
+}
+
+/**
+ * 用户登录
+ */
+export const login = (data) => {
+  return post('/api/auth/login', data)
+}
+
+/**
  * 微信登录
  */
 export const wxLogin = (code) => {
