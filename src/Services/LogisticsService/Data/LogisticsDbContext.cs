@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Intchain.LogisticsService.Models;
 
 namespace Intchain.LogisticsService.Data;
 
@@ -8,9 +9,18 @@ public class LogisticsDbContext : DbContext
     {
     }
 
+    public DbSet<LogisticsInfo> LogisticsInfos { get; set; }
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
-        // 实体配置将在后续添加
+
+        // 配置索引
+        modelBuilder.Entity<LogisticsInfo>()
+            .HasIndex(l => l.TrackingNumber)
+            .IsUnique();
+
+        modelBuilder.Entity<LogisticsInfo>()
+            .HasIndex(l => l.PrintingOrderId);
     }
 }

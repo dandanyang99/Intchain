@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Intchain.NotificationService.Models;
 
 namespace Intchain.NotificationService.Data;
 
@@ -8,9 +9,17 @@ public class NotificationDbContext : DbContext
     {
     }
 
+    public DbSet<Notification> Notifications { get; set; }
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
-        // 实体配置将在后续添加
+
+        // 配置索引
+        modelBuilder.Entity<Notification>()
+            .HasIndex(n => n.UserId);
+
+        modelBuilder.Entity<Notification>()
+            .HasIndex(n => n.Status);
     }
 }
