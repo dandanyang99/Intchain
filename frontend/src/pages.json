@@ -43,6 +43,30 @@
 			"style": {
 				"navigationBarTitleText": "发布产品"
 			}
+		},
+		{
+			"path": "pages/order/OrderApply",
+			"style": {
+				"navigationBarTitleText": "申请订单"
+			}
+		},
+		{
+			"path": "pages/order/OrderList",
+			"style": {
+				"navigationBarTitleText": "订单列表"
+			}
+		},
+		{
+			"path": "pages/order/OrderDetail",
+			"style": {
+				"navigationBarTitleText": "订单详情"
+			}
+		},
+		{
+			"path": "pages/approval/ApprovalPage",
+			"style": {
+				"navigationBarTitleText": "订单审批"
+			}
 		}
 	],
 	"globalStyle": {
