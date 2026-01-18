@@ -52,10 +52,10 @@ const requestInterceptor = (config) => {
 /**
  * 响应拦截器
  */
-const responseInterceptor = (response) => {
+const responseInterceptor = (response, config) => {
   // 打印响应日志
   if (apiConfig.showLog) {
-    console.log('【响应】', response.config.url, response)
+    console.log('【响应】', config?.url || 'unknown', response)
   }
 
   const { statusCode, data } = response
@@ -69,33 +69,39 @@ const responseInterceptor = (response) => {
     return Promise.reject(response)
   }
 
-  // 业务状态码检查
-  if (data.code !== 200) {
-    // token 过期或无效
-    if (data.code === 401) {
-      removeToken()
+  // 检查是否是统一响应格式（有code字段）
+  if (data.code !== undefined) {
+    // 业务状态码检查
+    if (data.code !== 200) {
+      // token 过期或无效
+      if (data.code === 401) {
+        removeToken()
+        uni.showToast({
+          title: '登录已过期，请重新登录',
+          icon: 'none'
+        })
+        // 跳转到登录页
+        setTimeout(() => {
+          uni.reLaunch({
+            url: '/pages/login/login'
+          })
+        }, 1500)
+        return Promise.reject(data)
+      }
+
+      // 其他业务错误
       uni.showToast({
-        title: '登录已过期，请重新登录',
+        title: data.message || '请求失败',
         icon: 'none'
       })
-      // 跳转到登录页
-      setTimeout(() => {
-        uni.reLaunch({
-          url: '/pages/login/login'
-        })
-      }, 1500)
       return Promise.reject(data)
     }
 
-    // 其他业务错误
-    uni.showToast({
-      title: data.message || '请求失败',
-      icon: 'none'
-    })
-    return Promise.reject(data)
+    return Promise.resolve(data.data)
   }
 
-  return data.data
+  // 直接返回格式（后端直接返回数据，没有包装）
+  return Promise.resolve(data)
 }
 
 /**
@@ -130,7 +136,7 @@ const request = (options) => {
     uni.request({
       ...interceptedConfig,
       success: (res) => {
-        responseInterceptor(res)
+        responseInterceptor(res, interceptedConfig)
           .then(resolve)
           .catch(reject)
       },
