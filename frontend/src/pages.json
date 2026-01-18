@@ -75,6 +75,12 @@
 			}
 		},
 		{
+			"path": "pages/order/PrintingOrderDetail",
+			"style": {
+				"navigationBarTitleText": "印刷订单详情"
+			}
+		},
+		{
 			"path": "pages/outlet/OutletManagement",
 			"style": {
 				"navigationBarTitleText": "销售网点管理"

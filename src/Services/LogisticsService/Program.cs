@@ -1,5 +1,6 @@
 using Intchain.Shared.Extensions;
 using Intchain.LogisticsService.Data;
+using Intchain.LogisticsService.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -11,6 +12,9 @@ builder.Services.AddMySqlDatabase<LogisticsDbContext>(builder.Configuration);
 
 // Add Redis Cache
 builder.Services.AddRedisCache(builder.Configuration);
+
+// Register LogisticsService
+builder.Services.AddScoped<ILogisticsService, LogisticsService>();
 
 // Add Swagger/OpenAPI support
 builder.Services.AddEndpointsApiExplorer();
