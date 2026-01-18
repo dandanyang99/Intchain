@@ -12,6 +12,10 @@ node_modules
 dist
 *.local
 
+# uni-app specific
+unpackage/
+.hbuilderx/
+
 # Editor directories and files
 .idea
 *.suo
