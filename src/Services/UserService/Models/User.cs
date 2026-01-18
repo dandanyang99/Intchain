@@ -40,6 +40,26 @@ public class User
     public string? OpenId { get; set; }
 
     /// <summary>
+    /// 微信会话密钥（用于后续解密用户敏感数据）
+    /// </summary>
+    [MaxLength(255)]
+    [Column("session_key")]
+    public string? SessionKey { get; set; }
+
+    /// <summary>
+    /// 微信UnionId（用于跨应用用户识别）
+    /// </summary>
+    [MaxLength(100)]
+    [Column("unionid")]
+    public string? UnionId { get; set; }
+
+    /// <summary>
+    /// OpenId绑定时间
+    /// </summary>
+    [Column("openid_bound_at")]
+    public DateTime? OpenIdBoundAt { get; set; }
+
+    /// <summary>
     /// 用户角色: Admin, LotteryCenter, PrintingFactory, SalesOutlet
     /// </summary>
     [Required]

@@ -26,6 +26,9 @@ builder.Services.AddScoped<IPasswordHasher, PasswordHasher>();
 builder.Services.AddScoped<IJwtTokenService, JwtTokenService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 
+// Register WeChat service
+builder.Services.AddHttpClient<IWeChatService, WeChatService>();
+
 // Add MySQL Database
 builder.Services.AddMySqlDatabase<UserDbContext>(builder.Configuration);
 

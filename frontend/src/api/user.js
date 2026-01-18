@@ -22,7 +22,21 @@ export const login = (data) => {
  * 微信登录
  */
 export const wxLogin = (code) => {
-  return post('/api/users/wx-login', { code })
+  return post('/api/auth/wechat-login', { code })
+}
+
+/**
+ * 绑定微信账号
+ */
+export const bindWeChat = (code) => {
+  return post('/api/auth/bind-wechat', { code })
+}
+
+/**
+ * 获取微信OpenId（用于注册时绑定）
+ */
+export const getOpenId = (code) => {
+  return post('/api/auth/get-openid', { code })
 }
 
 /**
